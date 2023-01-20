@@ -13,19 +13,23 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// Global counter
 var C counter
 
+// Counter mutex for counter
 type counter struct {
 	mu sync.Mutex
 	n  int
 }
 
+// Add value to counter
 func (c *counter) Add() {
 	c.mu.Lock()
 	c.n++
 	c.mu.Unlock()
 }
 
+// Get value from counter
 func (c *counter) Get() int {
 	c.mu.Lock()
 	n := c.n
@@ -33,12 +37,14 @@ func (c *counter) Get() int {
 	return n
 }
 
+// Reset counter
 func (c *counter) Reset() {
 	c.mu.Lock()
 	c.n = 0
 	c.mu.Unlock()
 }
 
+// getenv reads an environment  variable named k and returns it as type D
 func getenv[D ~string | int](k string, d D) D {
 	v := os.Getenv(k)
 	if len(v) == 0 {
@@ -59,10 +65,12 @@ func getenv[D ~string | int](k string, d D) D {
 	return r.(D)
 }
 
+// serve evaluates if the limit of requests is reached
 func serve(l int) bool {
 	return C.Get() < l
 }
 
+// handler generates the echo server response
 func handler(l int) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		r.ParseForm()
@@ -78,6 +86,7 @@ func handler(l int) http.HandlerFunc {
 	}
 }
 
+// httpHealth is a bad implementation of a health check
 func httpHealth(l int) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if !serve(l) {
@@ -89,6 +98,7 @@ func httpHealth(l int) http.HandlerFunc {
 	}
 }
 
+// reset resets the request counter
 func reset(rt string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		r.ParseForm()
