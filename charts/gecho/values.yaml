@@ -6,7 +6,7 @@ replicaCount: 1
 maxRequests: ""
 
 image:
-  repository: docker.io/tandrade/gecho
+  repository: git.thebarrens.nu/wolvie/gecho
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
