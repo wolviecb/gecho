@@ -57,10 +57,11 @@ func getenv[D ~string | int](k string, d D) D {
 	case int:
 		i, err := strconv.Atoi(v)
 		if err != nil {
+			log.Fatalf("Invalid Value, %s not a valid integer", k)
 		}
 		r = i
 	default:
-		log.Fatalf("Invalid Value, %s not a valid", k)
+		log.Fatalf("Invalid Value, %T not valid", k)
 	}
 	return r.(D)
 }
