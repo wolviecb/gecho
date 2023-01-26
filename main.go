@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -74,16 +75,26 @@ func serve(l int) bool {
 // handler generates the echo server response
 func handler(l int) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		r.ParseForm()
-		jm, err := json.Marshal(r.PostForm)
-		if err != nil || !serve(l) {
+		defer C.Add()
+		if !serve(l) {
 			w.WriteHeader(http.StatusInternalServerError)
-			fmt.Fprintln(w, "why did you do that?")
-			C.Add()
 			return
 		}
-		fmt.Fprintf(w, "%v", string(jm))
-		C.Add()
+		if r.Header.Get("Content-Type") == "application/json" {
+			v := make(map[string]interface{})
+			err := json.NewDecoder(r.Body).Decode(&v)
+			if err != nil {
+				http.Error(w, "why did you do that?", http.StatusInternalServerError)
+				return
+			}
+			fmt.Fprintf(w, "%s", v)
+			return
+		}
+		v, err := io.ReadAll(r.Body)
+		if err != nil {
+			http.Error(w, "Error reading body", http.StatusBadRequest)
+		}
+		fmt.Fprintf(w, "%s", v)
 	}
 }
 
