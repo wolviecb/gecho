@@ -102,8 +102,7 @@ func handler(l int) http.HandlerFunc {
 func httpHealth(l int) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if !serve(l) {
-			w.WriteHeader(http.StatusInternalServerError)
-			fmt.Fprintf(w, `{"status":"FAIL","requests":"%v"}`, C.Get())
+			http.Error(w, fmt.Sprintf(`{"status":"FAIL","requests":"%v"}`, C.Get()), http.StatusInternalServerError)
 			return
 		}
 		fmt.Fprintf(w, `{"status":"ok","requests":"%v"}`, C.Get())
@@ -116,8 +115,7 @@ func reset(rt string) http.HandlerFunc {
 		r.ParseForm()
 		t := r.FormValue("TOKEN")
 		if len(t) == 0 || t != rt {
-			w.WriteHeader(http.StatusBadRequest)
-			fmt.Fprintf(w, "Bad request, invalid token")
+			http.Error(w, "Bad request, invalid token", http.StatusBadRequest)
 			return
 		}
 		C.Reset()
