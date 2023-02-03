@@ -72,6 +72,14 @@ func serve(l int) bool {
 	return C.Get() < l
 }
 
+// reverse returns a reversed byte array of c
+func reverse(c []byte) []byte {
+	for i, j := 0, len(c)-1; i < j; i, j = i+1, j-1 {
+		c[i], c[j] = c[j], c[i]
+	}
+	return c
+}
+
 // handler generates the echo server response
 func handler(l int) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -93,6 +101,9 @@ func handler(l int) http.HandlerFunc {
 		v, err := io.ReadAll(r.Body)
 		if err != nil {
 			http.Error(w, "Error reading body", http.StatusBadRequest)
+		}
+		if r.Header.Get("Reverse") == "true" {
+			v = reverse(v)
 		}
 		fmt.Fprintf(w, "%s", v)
 	}
