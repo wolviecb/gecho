@@ -73,7 +73,7 @@ func serve(l int) bool {
 }
 
 // reverse returns a reversed byte array of c
-func reverse(c []byte) []byte {
+func reverse[C ~[]E, E any](c C) C {
 	for i, j := 0, len(c)-1; i < j; i, j = i+1, j-1 {
 		c[i], c[j] = c[j], c[i]
 	}
