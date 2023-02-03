@@ -14,14 +14,14 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// Global counter
-var C counter
-
 // Counter mutex for counter
 type counter struct {
 	mu sync.Mutex
 	n  int
 }
+
+// Global counter
+var C counter
 
 // Add value to counter
 func (c *counter) Add() {
