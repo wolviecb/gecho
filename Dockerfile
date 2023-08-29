@@ -1,11 +1,25 @@
-FROM golang:1.19 as build
+FROM golang:1.20 as build
 
-ENV CGO_ENABLED=0
+ARG TARGETOS
+ARG TARGETARCH
+
+# Github Actions build labels
+ARG BUILD_DATE
+
+ENV BUILD_DATE=$BUILD_DATE
+ENV GITHUB_SHA=$GITHUB_SHA
+
 WORKDIR /gecho
 
-COPY go.* main.go /gecho/
-RUN go get ./... && \
-    go build
+COPY go.mod go.mod
+COPY go.sum go.sum
+RUN go mod download
+
+COPY main.go main.go
+COPY gecho.go gecho.go
+COPY tools.go tools.go
+RUN CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH} go build -a -o gecho *.go
+
 
 FROM scratch
 
